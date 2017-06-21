@@ -45,12 +45,17 @@
     NSMutableDictionary * dictText = [NSMutableDictionary dictionaryWithObjectsAndKeys:[UIColor blackColor],NSForegroundColorAttributeName, [UIFont systemFontOfSize:16], NSFontAttributeName, nil];
 
     [self.navigationController.navigationBar setTitleTextAttributes:dictText];
+
     
-    UISwipeGestureRecognizer * swipeGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(push:)];
-    swipeGestureRecognizer.numberOfTouchesRequired = 3;
-    swipeGestureRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
-    
-    [self.view addGestureRecognizer:swipeGestureRecognizer];
+    UITapGestureRecognizer * tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(push:)];
+    tap.numberOfTapsRequired = 2;
+    [self.view addGestureRecognizer:tap];
+
+//    UISwipeGestureRecognizer * swipeGestureRecognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(push:)];
+//    swipeGestureRecognizer.numberOfTouchesRequired = 3;
+//    swipeGestureRecognizer.direction = UISwipeGestureRecognizerDirectionRight;
+//
+//    [self.view addGestureRecognizer:swipeGestureRecognizer];
 }
 
 -(IBAction) push:(UISwipeGestureRecognizer *)swipe
