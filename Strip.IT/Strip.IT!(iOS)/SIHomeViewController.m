@@ -36,24 +36,25 @@
 #import "SIHomeCell.h"
 #import "SIVideoModel.h"
 #import "SIVideoPlayerViewController.h"
-
+#import <WebKit/WebKit.h>
 #import "MBProgressHUD+SIHUD.h"
 
 #define SI_FIRST_PAGE YES
 #define SI_MORE_PAGE  NO
 
 
-@interface SIHomeViewController() <UITableViewDelegate, UITableViewDataSource>
+@interface SIHomeViewController() <UITableViewDelegate, UITableViewDataSource, UIWebViewDelegate>
 
 @property(nonatomic, assign) NSInteger page;
 @property(nonatomic, strong) NSMutableArray * datasource;
 @property(nonatomic, strong) NSString * embedURL;
 @property(nonatomic, strong) NSString * embedTitle;
 
-
 @property(nonatomic, strong) IBOutlet UITableView * tableView;
 
+@property(nonatomic, strong) MBProgressHUD * hud;
 
+@property(nonatomic, strong) SIRequest * request;
 @end
 
 @implementation SIHomeViewController
@@ -69,32 +70,46 @@
 {
     [super viewDidLoad];
     
+    
+    //
     self.navigationItem.hidesBackButton = YES;
 
     self.tableView.rowHeight = 200;
-    
+
     [self loadData:SI_FIRST_PAGE];
 }
 
 -(void) loadData:(BOOL)firstPageOrMorePage
 {
-    MBProgressHUD * hud = [MBProgressHUD showLoadingHud:@""];
+    [self hideHUD];
     
-    [SIRequest requestWithType:SIRequestTypeHomepage parameter:nil success:^(NSURLSessionDataTask *task, id responseObject) {
+    self.hud = [MBProgressHUD showLoadingHud:@""];
+    
+    self.request = [SIRequest requestWithType:SIRequestTypeHomepage parameter:nil success:^(NSURLSessionDataTask *task, id responseObject) {
         
         if (firstPageOrMorePage) {
-
+            
             self.datasource = [SIHTMLParser parsingWithObject:responseObject];
-            [self.tableView reloadData];
+            
+            [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:YES];
         }
         
-        [hud hideAnimated:YES];
+        [self hideHUD];
         
     } failure:^(NSURLSessionDataTask *task, NSError *error) {
         
-        [hud hideAnimated:YES];
+        [self hideHUD];
+
         [MBProgressHUD showMessageHud:error.description];
     }];
+}
+
+-(void) hideHUD
+{
+    if (self.hud) {
+        [self.hud hideAnimated:YES];
+        self.hud = nil;
+    }
 }
 
 #pragma mark - TableView
@@ -154,7 +169,7 @@
     //
     MBProgressHUD * hud = [MBProgressHUD showLoadingHud:@""];
     
-    [SIRequest requestWithType:SIRequestTypeDetailPage parameter:videoModel.detailPageURLString success:^(NSURLSessionDataTask *task, id responseObject) {
+    self.request = [SIRequest requestWithType:SIRequestTypeDetailPage parameter:videoModel.detailPageURLString success:^(NSURLSessionDataTask *task, id responseObject) {
         
         [hud hideAnimated:YES];
         

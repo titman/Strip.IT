@@ -32,13 +32,16 @@
 
 #import "SIRequest.h"
 #import "AFNetworking.h"
+#import <WebKit/WebKit.h>
 
-
-@interface SIRequest()
+@interface SIRequest() <WKNavigationDelegate>
 
 @property(nonatomic, assign) SIRequestType type;
 @property(nonatomic, copy) void(^successBlock) (NSURLSessionDataTask *task, id responseObject);
 @property(nonatomic, copy) void(^failureBlock) (NSURLSessionDataTask *task, NSError *error);
+
+//
+@property(nonatomic, strong) WKWebView * webView;
 
 @end
 
@@ -52,7 +55,7 @@
     SIRequest * request = [[SIRequest alloc] initWithType:type success:success failure:failure];
     request.parameter = parameter;
     
-    [request request];
+    [request performSelector:@selector(request) withObject:nil afterDelay:0];
     
     return request;
 }
@@ -63,9 +66,23 @@
 {
     if (self = [super init]) {
         
+        // 如果你的浏览器能打开网站，手机里打不开的话，在这设置成SIRequestModeWebRequest
+        self.requestMode = SIRequestModeNormalRequest;
+        
         self.type = type;
         self.successBlock = success;
         self.failureBlock = failure;
+
+        
+        WKWebViewConfiguration * config = [[WKWebViewConfiguration alloc] init];
+        config.preferences = [[WKPreferences alloc] init];
+        config.preferences.javaScriptEnabled = YES;
+        config.preferences.javaScriptCanOpenWindowsAutomatically = YES;
+        
+        self.webView = [[WKWebView alloc] initWithFrame:CGRectMake(0, 0, 1800, 1800) configuration:config];
+        self.webView.navigationDelegate = self;
+        
+        [self.webView scrollView];
     }
     
     return self;
@@ -86,10 +103,47 @@
             url = self.parameter;
     }
     
-    AFHTTPSessionManager * manager = [AFHTTPSessionManager manager];
-    manager.responseSerializer     = [AFHTTPResponseSerializer serializer];
+    if (self.requestMode == SIRequestModeNormalRequest) {
+     
+        AFHTTPSessionManager * manager = [AFHTTPSessionManager manager];
+        manager.responseSerializer     = [AFHTTPResponseSerializer serializer];
+        
+        [manager GET:url parameters:nil progress:nil success:self.successBlock failure:self.failureBlock];
+    }
+    else{
+     
+        [self.webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:url]]];
+    }
+}
+
+#pragma mark -
+
+-(void) webView:(WKWebView *)webView didFailProvisionalNavigation:(null_unspecified WKNavigation *)navigation withError:(NSError *)error
+{
+    if (self.failureBlock) {
+        self.failureBlock(nil, error);
+    }
     
-    [manager GET:url parameters:nil progress:nil success:self.successBlock failure:self.failureBlock];    
+    self.failureBlock = nil;
+}
+
+-(void) webView:(WKWebView *)webView didCommitNavigation:(null_unspecified WKNavigation *)navigation
+{
+    ;
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(null_unspecified WKNavigation *)navigation
+{
+    __weak typeof(self) weakSelf = self;
+    
+    [webView evaluateJavaScript:@"document.documentElement.innerHTML" completionHandler:^(id _Nullable value, NSError * _Nullable error) {
+        
+        if (weakSelf.successBlock) {
+            weakSelf.successBlock(nil, [value dataUsingEncoding:NSUTF8StringEncoding]);
+        }
+        
+        weakSelf.successBlock = nil;
+    }];
 }
 
 @end

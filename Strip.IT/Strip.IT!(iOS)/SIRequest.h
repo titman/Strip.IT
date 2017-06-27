@@ -41,9 +41,17 @@ typedef NS_ENUM (NSInteger, SIRequestType){
     SIRequestTypeGetVideoURL,
 };
 
+typedef NS_ENUM(NSInteger, SIRequestMode) {
+    
+    SIRequestModeNormalRequest, // Default
+    SIRequestModeWebRequest,
+};
+
+
 @interface SIRequest : NSObject
 
 @property(nonatomic, strong) NSString * parameter;
+@property(nonatomic, assign) SIRequestMode requestMode;
 
 +(instancetype) requestWithType:(SIRequestType)type
                       parameter:(NSString *)parameter

@@ -51,6 +51,7 @@
 @property(nonatomic, strong) VLCMedia * media;
 
 @property(nonatomic, strong) NSString * videoURLString;
+@property(nonatomic, strong) SIRequest * request;
 
 @end
 
@@ -79,8 +80,8 @@
     MBProgressHUD * hud = [MBProgressHUD showLoadingHud:@""];
     
     NSLog(@"Loading : %@", self.embedURL);
-    
-    [SIRequest requestWithType:SIRequestTypeGetVideoURL parameter:self.embedURL success:^(NSURLSessionDataTask *task, id responseObject) {
+        
+    self.request = [SIRequest requestWithType:SIRequestTypeGetVideoURL parameter:self.embedURL success:^(NSURLSessionDataTask *task, id responseObject) {
         
         [hud hideAnimated:YES];
         
