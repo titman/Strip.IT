@@ -173,7 +173,9 @@
         
         [hud hideAnimated:YES];
         
-        self.embedURL = [SIHTMLParser parsingEmbedURLWithObject:responseObject];
+        NSURL * url = [NSURL URLWithString:videoModel.detailPageURLString];
+        
+        self.embedURL = [SIHTMLParser parsingEmbedURLWithObject:responseObject host:url.host];
         self.embedTitle = videoModel.title;
         
         [self performSegueWithIdentifier:@"SIVideoPlayer" sender:self];

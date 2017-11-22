@@ -97,7 +97,7 @@
             url = MAIN_URL;
             break;
         case SIRequestTypeDetailPage:
-            url = [NSString stringWithFormat:@"%@%@", MAIN_URL, self.parameter];
+            url = [self.parameter hasPrefix:@"http"] ? self.parameter : [NSString stringWithFormat:@"%@%@", MAIN_URL, self.parameter];
             break;
         default:
             url = self.parameter;
@@ -107,6 +107,15 @@
      
         AFHTTPSessionManager * manager = [AFHTTPSessionManager manager];
         manager.responseSerializer     = [AFHTTPResponseSerializer serializer];
+        
+        [manager setTaskWillPerformHTTPRedirectionBlock:^NSURLRequest * _Nonnull(NSURLSession * _Nonnull session, NSURLSessionTask * _Nonnull task, NSURLResponse * _Nonnull response, NSURLRequest * _Nonnull request) {
+            
+            if (request) {
+                return request;
+            }
+            
+            return nil;
+        }];
         
         [manager GET:url parameters:nil progress:nil success:self.successBlock failure:self.failureBlock];
     }

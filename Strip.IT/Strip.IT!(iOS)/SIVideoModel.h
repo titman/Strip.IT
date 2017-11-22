@@ -45,4 +45,6 @@
 
 @property(nonatomic, strong) NSString * detailPageURLString;
 
+@property(nonatomic, assign) BOOL vipOnly;
+
 @end

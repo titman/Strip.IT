@@ -67,6 +67,23 @@
             model.previewImageURLString = [imgElement objectForKey:@"src"];
         }
         
+        // all span
+        NSArray * allspanElements = [kt_imgrcElement searchWithXPathQuery:@"//span"];
+
+        BOOL vipOnly = NO;
+        
+        for (TFHppleElement * span in allspanElements) {
+            
+            if ([span.raw rangeOfString:@"vip.png"].length) {
+                NSLog(@"跳过");
+                vipOnly = YES;
+            }
+        }
+        
+        if (vipOnly) {
+            continue;
+        }
+
         //
         NSArray * viewsElements = [kt_imgrcElement searchWithXPathQuery:@"//span[@class = 'views']"];
 
@@ -105,22 +122,33 @@
     return result;
 }
 
-+(NSString *) parsingEmbedURLWithObject:(id)object
++(NSString *) parsingEmbedURLWithObject:(id)object host:(NSString *)host
 {
     NSString * raw = [[NSString alloc] initWithData:object encoding:NSUTF8StringEncoding];
     
     raw = [raw stringByReplacingOccurrencesOfString:@"\r" withString:@""];
     raw = [raw stringByReplacingOccurrencesOfString:@"\n" withString:@""];
     raw = [raw stringByReplacingOccurrencesOfString:@"\t" withString:@""];
+
+    NSRange srange = [raw rangeOfString:@"video_url: '"];
+    NSRange erange = [raw rangeOfString:@"', postfix"];
+
+    if(srange.length && erange.length){
+        NSString * string = [raw substringToIndex:erange.location];
+        string = [string substringFromIndex:srange.location + srange.length];
+        string = [NSString stringWithFormat:@"http://%@%@",host, string];
+        return string;
+    }
     
+    return nil;
     
-    TFHpple * hpple = [[TFHpple alloc] initWithHTMLData:[raw dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    TFHppleElement * videoIDElement = [hpple peekAtSearchWithXPathQuery:@"//div[@class = 'video-id']"];
-    
-    NSString * videoID = [videoIDElement objectForKey:@"data-video-id"];
-    
-    return [NSString stringWithFormat:@"%@embed/%@", MAIN_URL, videoID];
+//    TFHpple * hpple = [[TFHpple alloc] initWithHTMLData:[raw dataUsingEncoding:NSUTF8StringEncoding]];
+//
+//    TFHppleElement * videoIDElement = [hpple peekAtSearchWithXPathQuery:@"//video[@id = 'kt_player_internal']"];
+//
+//    NSString * videoURL = [videoIDElement objectForKey:@"src"];
+//
+//    return [NSString stringWithFormat:@"%@embed/%@", MAIN_URL, videoID];
 }
 
 +(NSString *) parsingVideoURLWithObject:(id)object

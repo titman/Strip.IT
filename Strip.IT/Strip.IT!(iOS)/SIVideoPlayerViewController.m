@@ -77,16 +77,16 @@
 
     [self.player addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew context:nil];
 
-    MBProgressHUD * hud = [MBProgressHUD showLoadingHud:@""];
+//    MBProgressHUD * hud = [MBProgressHUD showLoadingHud:@""];
+//
+//    NSLog(@"Loading : %@", self.embedURL);
+//
+//    self.request = [SIRequest requestWithType:SIRequestTypeGetVideoURL parameter:self.embedURL success:^(NSURLSessionDataTask *task, id responseObject) {
+//
+//        [hud hideAnimated:YES];
     
-    NSLog(@"Loading : %@", self.embedURL);
-        
-    self.request = [SIRequest requestWithType:SIRequestTypeGetVideoURL parameter:self.embedURL success:^(NSURLSessionDataTask *task, id responseObject) {
-        
-        [hud hideAnimated:YES];
-        
         //
-        self.videoURLString = [SIHTMLParser parsingVideoURLWithObject:responseObject];
+       self.videoURLString = self.embedURL;//[SIHTMLParser parsingVideoURLWithObject:responseObject];
         
         if (self.videoURLString.length) {
             
@@ -102,11 +102,11 @@
             [MBProgressHUD showMessageHud:@"该视频暂时无法播放"];
         }
         
-    } failure:^(NSURLSessionDataTask *task, NSError *error) {
-        
-        [hud hideAnimated:YES];
-        [MBProgressHUD showMessageHud:error.description];
-    }];
+//    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+//
+//        [hud hideAnimated:YES];
+//        [MBProgressHUD showMessageHud:error.description];
+//    }];
     
     self.title = self.titleString;
 }

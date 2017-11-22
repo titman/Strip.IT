@@ -32,7 +32,7 @@
 
 #import <Foundation/Foundation.h>
 
-#define MAIN_URL @"http://www.99kk5.com/"
+#define MAIN_URL @"http://www.99gg.co/"
 
 typedef NS_ENUM (NSInteger, SIRequestType){
     

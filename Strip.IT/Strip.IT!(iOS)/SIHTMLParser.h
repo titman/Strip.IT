@@ -35,7 +35,7 @@
 @interface SIHTMLParser : NSObject
 
 +(NSMutableArray *) parsingWithObject:(id)object;
-+(NSString *) parsingEmbedURLWithObject:(id)object;
++(NSString *) parsingEmbedURLWithObject:(id)object host:(NSString *)host;
 +(NSString *) parsingVideoURLWithObject:(id)object;
 
 @end
